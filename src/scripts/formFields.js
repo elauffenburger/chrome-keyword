@@ -11,6 +11,12 @@ function FormInfo(keyword, url, fieldXPath, formXPath) {
   };
 }
 
+function Response(value) {
+  return {
+    value: value
+  };
+}
+
 function getLastInput() {
   return _keywordCtxLastInput;
 }
@@ -42,34 +48,34 @@ function bindInputEventHandlers() {
   }
 }
 
-function getKeyword() {
+function getKeyword(callback) {
   if(_debug) {
     return "pepdir";
   }
 
-  var keyword = prompt("Enter keyword for search: ");
+  console.log("%O", chrome.extension.getURL("html/test.html"));
 
-  return keyword;
+  var keyword = prompt("Enter keyword for search: ");
+  callback(keyword);
+}
+
+function createFormField(request, sendResponse) {
+  getKeyword(function(keyword) {
+    var lastInput = getLastInput();
+
+    var form = lastInput.form;
+    var formInfo = new FormInfo(keyword, lastInput.baseURI, getElementXPath(lastInput), getElementXPath(form));
+
+    sendResponse(new Response(formInfo));
+  });
 }
 
 function bindListeners() {
-  function Response(value) {
-    return {
-      value: value
-    };
-  }
-
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     console.log("received request: %O", request);
 
     if(request.command == "createFormField") {
-      var keyword = getKeyword();
-      var lastInput = getLastInput();
-
-      var form = lastInput.form;
-      var formInfo = new FormInfo(keyword, lastInput.baseURI, getElementXPath(lastInput), getElementXPath(form));
-
-      sendResponse(new Response(formInfo));
+      createFormField(request, sendResponse);
     }
   });
 }

@@ -2,7 +2,7 @@ var _debug = false;
 
 contextMenuCallbacks = {};
 
-function message(command, args) {
+function Message(command, args) {
   return {
     command: command,
     args: args
@@ -105,7 +105,7 @@ function runSearch(request) {
       },
       function(tab) {
         chrome.tabs.executeScript(tab.id, {
-          file: "submitForm.js",
+          file: "scripts/submitForm.js",
           runAt: "document_idle"
         },
         function(results) {
@@ -148,6 +148,35 @@ function findExistingKeyword(keywords, findKey) {
   return null;
 }
 
+function createNewFormInfo(response) {
+  var formInfo = response.value;
+  var key = formInfo.keyword;
+
+  if(key) {
+    chrome.storage.sync.get("keywords", function(keywords) {
+      var allKeywords = keywords.keywords;
+
+      if(!(allKeywords instanceof Array)) {
+        allKeywords = [];
+      }
+
+      var existingKeyword = findExistingKeyword(allKeywords, key);
+
+      if(!existingKeyword) {
+        allKeywords.push(formInfo);
+
+        chrome.storage.sync.set({"keywords": allKeywords}, function(result) {
+
+        });
+      }else{
+        handleDuplicateKeyCreateRequest();
+      }
+    });
+  }else{
+    handleNullKeyCreateRequest();
+  }
+}
+
 function createContextMenuItems() {
   function createMenuItem(type, id, parent, title, onclick) {
     var returnedID = chrome.contextMenus.create({
@@ -166,35 +195,7 @@ function createContextMenuItems() {
     createMenuItem("normal", "root", null, "Save Form", function(info, tab) {
       if(info.editable) {
         console.log("I'm editable!");
-
-        chrome.tabs.sendMessage(tab.id, new message("createFormField", null), null, function(response) {
-          var formInfo = response.value;
-          var key = formInfo.keyword;
-
-          if(key) {
-            chrome.storage.sync.get("keywords", function(keywords) {
-              var allKeywords = keywords.keywords;
-
-              if(!(allKeywords instanceof Array)) {
-                allKeywords = [];
-              }
-
-              var existingKeyword = findExistingKeyword(allKeywords, key);
-
-              if(!existingKeyword) {
-                allKeywords.push(formInfo);
-
-                chrome.storage.sync.set({"keywords": allKeywords}, function(result) {
-
-                });
-              }else{
-                handleDuplicateKeyCreateRequest();
-              }
-            });
-          }else{
-            handleNullKeyCreateRequest();
-          }
-        });
+        chrome.tabs.sendMessage(tab.id, new Message("createFormField", null), null, createNewFormInfo);
       }
     });
   }
