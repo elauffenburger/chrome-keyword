@@ -2,13 +2,12 @@ var _debug = false;
 
 var _keywordCtxLastInput = null;
 
-function FormInfo(keyword, url, fieldID, formID, formAction) {
+function FormInfo(keyword, url, fieldXPath, formXPath) {
   return {
     keyword: keyword,
     url: url,
-    fieldID: fieldID,
-    formID: formID,
-    formAction: formAction
+    fieldXPath: fieldXPath,
+    formXPath: formXPath
   };
 }
 
@@ -68,7 +67,7 @@ function bindListeners() {
       var lastInput = getLastInput();
 
       var form = lastInput.form;
-      var formInfo = new FormInfo(keyword, lastInput.baseURI, lastInput.id, form.id, form.action);
+      var formInfo = new FormInfo(keyword, lastInput.baseURI, getElementXPath(lastInput), getElementXPath(form));
 
       sendResponse(new Response(formInfo));
     }

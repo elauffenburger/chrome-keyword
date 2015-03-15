@@ -1,13 +1,17 @@
 function showLoadingArea() {
-  document.querySelector("html").hidden = true;
+  //document.querySelector("html").hidden = true;
 }
 
-function submitForm(formID, formFieldID, formFieldValue) {
+function getElementByXPath(xpath) {
+  return document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+}
+
+function submitForm(formXPath, fieldXPath, formFieldValue) {
   showLoadingArea();
 
-  var formField = document.getElementById(formFieldID);
+  var formField = getElementByXPath(fieldXPath);
   formField.value = formFieldValue;
 
-  var form = document.getElementById(formID);
+  var form = getElementByXPath(formXPath);
   form.submit();
 }

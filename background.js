@@ -9,6 +9,7 @@ function message(command, args) {
   };
 }
 
+// TODO add suggestions
 function inputChanged(text, suggest) {
   // suggest([
   //   {
@@ -30,11 +31,11 @@ function createFormUrlEncodedContent(keyValuePairs) {
   return content.join("&");
 }
 
-function buildSubmitFormCode(formID, formFieldID, text){
+function buildSubmitFormCode(formXPath, fieldXPath, search){
   var code = "submitForm('{0}', '{1}', '{2}');";
-  code = code.replace(/\{0\}/, formID)
-  .replace(/\{1\}/, formFieldID)
-  .replace(/\{2\}/, text);
+  code = code.replace(/\{0\}/, formXPath)
+  .replace(/\{1\}/, fieldXPath)
+  .replace(/\{2\}/, search);
 
   return code;
 }
@@ -68,6 +69,7 @@ function handleBadKeyword() {
   return;
 }
 
+// TODO fix debug return object
 function getFormInfo(keyword, callback) {
   if(_debug) {
     return {
@@ -108,7 +110,7 @@ function runSearch(request) {
         },
         function(results) {
           chrome.tabs.executeScript(tab.id, {
-            code: buildSubmitFormCode(formInfo.formID, formInfo.fieldID, request.search)
+            code: buildSubmitFormCode(formInfo.formXPath, formInfo.fieldXPath, request.search)
           });
         });
       });
