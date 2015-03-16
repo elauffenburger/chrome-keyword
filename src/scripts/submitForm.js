@@ -1,5 +1,9 @@
 function showLoadingArea() {
-  //document.querySelector("html").hidden = true;
+  document.querySelector("html").hidden = true;
+}
+
+function removeLoadingArea() {
+  document.querySelector("html").hidden = false;
 }
 
 function getElementByXPath(xpath) {
@@ -7,8 +11,6 @@ function getElementByXPath(xpath) {
 }
 
 function submitForm(formXPath, fieldXPath, formFieldValue) {
-  showLoadingArea();
-
   var formField = getElementByXPath(fieldXPath);
   formField.value = formFieldValue;
 

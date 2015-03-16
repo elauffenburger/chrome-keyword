@@ -1,6 +1,7 @@
 var _debug = false;
 
 var _keywordCtxLastInput = null;
+var _loadedAddKeyword = false;
 
 function FormInfo(keyword, url, fieldXPath, formXPath) {
   return {
@@ -11,7 +12,7 @@ function FormInfo(keyword, url, fieldXPath, formXPath) {
   };
 }
 
-function Response(value) {
+function CKResponse(value) {
   return {
     value: value
   };
@@ -50,40 +51,69 @@ function bindInputEventHandlers() {
 
 function getKeyword(callback) {
   if(_debug) {
-    return "pepdir";
+    callback("pepdir");
   }
 
-  var toInjectUrl = chrome.extension.getURL("html/test.html");
-  $.get(toInjectUrl, function(html) {
+  var injectUrl = $.get(chrome.extension.getURL("/html/addKeyword.html")).then(function(html) {
     $("body").append(html);
+    _loadedAddKeyword = true;
+
+    var keywordField = $("#__ck_keywordName");
+    keywordField.val("");
 
     var __ck_dialog = $("#__ck_dialog_create_keyword").dialog({
       autoOpen: true,
       modal: true,
       buttons: {
         "Create": function() {
-          var keyword = $("#__ck_keywordName").val();
+          var keyword = keywordField.val();
+          __ck_dialog.dialog("close");
 
           callback(keyword);
         },
         "Cancel": function() {
           __ck_dialog.dialog("close");
-
           callback(null);
         }
       }
     });
+
+
   });
 }
 
-function createFormField(request, sendResponse) {
-  getKeyword(function(keyword) {
-    var lastInput = getLastInput();
+function createFormField(req, res) {
+  (function(request, sendResponse) {
+    getKeyword(function(keyword) {
+      var lastInput = getLastInput();
 
-    var form = lastInput.form;
-    var formInfo = new FormInfo(keyword, lastInput.baseURI, getElementXPath(lastInput), getElementXPath(form));
+      var form = lastInput.form;
+      var formInfo = new FormInfo(keyword, lastInput.baseURI, getElementXPath(lastInput), getElementXPath(form));
 
-    sendResponse(new Response(formInfo));
+      sendResponse(new CKResponse(formInfo));
+    });
+  })(req, res);
+}
+
+function creationSuccess(request, sendResponse) {
+  var success = $("#__ck_dialog_create_keyword_success").dialog({
+    autoOpen: true,
+    buttons: {
+      "Awesome!": function() {
+        success.dialog("close");
+      }
+    }
+  });
+}
+
+function failureKeyExists(request, sendResponse) {
+  var success = $("#__ck_dialog_create_keyword_exists").dialog({
+    autoOpen: true,
+    buttons: {
+      "Ah man...": function() {
+        success.dialog("close");
+      }
+    }
   });
 }
 
@@ -93,7 +123,13 @@ function bindListeners() {
 
     if(request.command == "createFormField") {
       createFormField(request, sendResponse);
+    }else if(request.command == "creationSuccess") {
+      creationSuccess(request, sendResponse);
+    }else if(request.command == "failureKeyExists") {
+      failureKeyExists(request, sendResponse);
     }
+
+    return true;
   });
 }
 

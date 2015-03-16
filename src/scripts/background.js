@@ -148,7 +148,7 @@ function findExistingKeyword(keywords, findKey) {
   return null;
 }
 
-function createNewFormInfo(response) {
+function createNewFormInfo(response, tab) {
   var formInfo = response.value;
   var key = formInfo.keyword;
 
@@ -166,14 +166,16 @@ function createNewFormInfo(response) {
         allKeywords.push(formInfo);
 
         chrome.storage.sync.set({"keywords": allKeywords}, function(result) {
+          chrome.tabs.sendMessage(tab.id, new Message("creationSuccess", null), null, function(result) {
 
+          });
         });
       }else{
-        handleDuplicateKeyCreateRequest();
+        handleDuplicateKeyCreateRequest(tab);
       }
     });
   }else{
-    handleNullKeyCreateRequest();
+    handleNullKeyCreateRequest(tab);
   }
 }
 
@@ -195,7 +197,11 @@ function createContextMenuItems() {
     createMenuItem("normal", "root", null, "Save Form", function(info, tab) {
       if(info.editable) {
         console.log("I'm editable!");
-        chrome.tabs.sendMessage(tab.id, new Message("createFormField", null), null, createNewFormInfo);
+        chrome.tabs.sendMessage(tab.id, new Message("createFormField", null), null, function(response) {
+          createNewFormInfo(response, tab);
+        });
+      }else{
+
       }
     });
   }
@@ -205,12 +211,16 @@ function createContextMenuItems() {
   });
 }
 
-function handleNullKeyCreateRequest() {
+function handleNullKeyCreateRequest(tab) {
   console.log("Invalid key entered");
 }
 
-function handleDuplicateKeyCreateRequest() {
+function handleDuplicateKeyCreateRequest(tab) {
   console.log("Key already exists!");
+
+  chrome.tabs.sendMessage(tab.id, new Message("failureKeyExists", null), null, function(response) {
+    
+  });
 }
 
 function createEventHandlers() {

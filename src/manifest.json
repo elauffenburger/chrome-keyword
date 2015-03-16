@@ -1,5 +1,5 @@
 {
-  "name": "Chrome Keyword Search",
+  "name": "Keyword Search",
   "description": "",
   "omnibox": {
     "keyword": "kw"
@@ -14,7 +14,8 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["scripts/xpath.js", "scripts/formFields.js", "scripts/jquery.js"]
+      "js": ["scripts/xpath.js", "scripts/formFields.js", "scripts/jquery.js", "scripts/jquery-ui/jquery-ui.min.js"],
+      "css": ["scripts/jquery-ui/jquery-ui.min.css"]
     }
   ],
   "permissions": [
