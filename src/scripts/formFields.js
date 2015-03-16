@@ -53,10 +53,27 @@ function getKeyword(callback) {
     return "pepdir";
   }
 
-  console.log("%O", chrome.extension.getURL("html/test.html"));
+  var toInjectUrl = chrome.extension.getURL("html/test.html");
+  $.get(toInjectUrl, function(html) {
+    $("body").append(html);
 
-  var keyword = prompt("Enter keyword for search: ");
-  callback(keyword);
+    var __ck_dialog = $("#__ck_dialog_create_keyword").dialog({
+      autoOpen: true,
+      modal: true,
+      buttons: {
+        "Create": function() {
+          var keyword = $("#__ck_keywordName").val();
+
+          callback(keyword);
+        },
+        "Cancel": function() {
+          __ck_dialog.dialog("close");
+
+          callback(null);
+        }
+      }
+    });
+  });
 }
 
 function createFormField(request, sendResponse) {
