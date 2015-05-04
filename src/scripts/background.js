@@ -52,8 +52,9 @@ function processRequestText(text) {
     };
   }
 
-  var keyword = text.split(' ')[0];
-  var search = text.split(' ')[1];
+  var tokens = text.split(' ');
+  var keyword = tokens[0];
+  var search = tokens.slice(1).join(' ');
 
   if(!keyword || !search) {
     return null;
@@ -219,7 +220,7 @@ function handleDuplicateKeyCreateRequest(tab) {
   console.log("Key already exists!");
 
   chrome.tabs.sendMessage(tab.id, new Message("failureKeyExists", null), null, function(response) {
-    
+
   });
 }
 
