@@ -1,0 +1,4 @@
+build/**
+tsd.json
+typings/
+src/node_modules/

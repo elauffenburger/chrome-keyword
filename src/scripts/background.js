@@ -1,5 +1,3 @@
-var _debug = false;
-
 contextMenuCallbacks = {};
 
 function Message(command, args) {
@@ -45,13 +43,6 @@ function handleBadRequest() {
 }
 
 function processRequestText(text) {
-  if(_debug) {
-    return {
-      keyword: "pepdir",
-      search: text
-    };
-  }
-
   var tokens = text.split(' ');
   var keyword = tokens[0];
   var search = tokens.slice(1).join(' ');
@@ -72,14 +63,6 @@ function handleBadKeyword() {
 
 // TODO fix debug return object
 function getFormInfo(keyword, callback) {
-  if(_debug) {
-    return {
-      url: "https://community.pepperdine.edu/directory/employees/default.htm",
-      fieldID: "results",
-      formID: "frmDirectory"
-    };
-  }
-
   chrome.runtime.lastError = null;
   chrome.storage.sync.get("keywords", function(item) {
     var data = item["keywords"];
@@ -224,11 +207,18 @@ function handleDuplicateKeyCreateRequest(tab) {
   });
 }
 
+function onBrowserAction() {
+  chrome.tabs.create({
+    'url': '../manage/manage.html'
+  });
+}
+
 function createEventHandlers() {
   chrome.omnibox.onInputChanged.addListener(inputChanged);
   chrome.omnibox.onInputEntered.addListener(inputEntered);
 
   chrome.contextMenus.onClicked.addListener(handleContextMenuClicked);
+  chrome.browserAction.onClicked.addListener(onBrowserAction);
 }
 
 (function init() {

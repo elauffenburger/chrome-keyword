@@ -23,7 +23,7 @@ function getLastInput() {
 }
 
 function bindInputEventHandlers() {
-  var inputs = document.querySelectorAll("input[type='text']");
+  var inputs = document.querySelectorAll("input[type='text'], input[type='search']");
 
   for(var key in inputs) {
     var input = inputs[key];

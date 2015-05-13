@@ -1,0 +1,29 @@
+<style>
+	
+</style>
+
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+		<h1>Manage your keywords here.</h1>
+		<div>
+			<ul>
+				<div class="well" ng-repeat="keyword in vm.keywords">
+					{{keyword}}
+					<div>
+						<h3>Keyword:</h3>
+						<p>{{keyword.keyword}}</p>
+					</div>
+					<div>
+						<h3>Url:</h3>
+						<p>{{keyword.url}}</p>
+					</div>
+					
+					<div class="btn btn-danger" ng-click="vm.removeKeyword(keyword.keyword)">
+						Remove keyword
+					</div>
+				</div>
+			</ul>
+		</div>
+	</div>
+</div>
+

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html ng-app="app">
+	<head><% _.forEach(libs, function(lib) { %>
+		<script src="<%- lib %>" type="text/javascript"></script><% }) %>
+		<% _.forEach(modules, function(module) { %>
+		<script src="<%- module %>" type="text/javascript"></script><% }) %>
+			
+		<link href="style/all.min.css" rel="stylesheet" type="text/css"></link>
+	</head>
+	<body ui-view>
+
+	</body>
+</html>
