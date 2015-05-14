@@ -13,9 +13,7 @@ function FormInfo(keyword, url, fieldXPath, formXPath) {
 }
 
 function CKResponse(value) {
-  return {
-    value: value
-  };
+  this.value = value;
 }
 
 function getLastInput() {
@@ -25,23 +23,23 @@ function getLastInput() {
 function bindInputEventHandlers() {
   var inputs = document.querySelectorAll("input[type='text'], input[type='search']");
 
-  for(var key in inputs) {
+  for (var key in inputs) {
     var input = inputs[key];
     var oldFunction = input.onfocus;
 
     console.log(input);
 
-    input.onfocus = (function(old_function) {
+    input.onfocus = (function (old_function) {
       console.log("old_function: %O", old_function);
 
-      return function(event) {
+      return function (event) {
         (function setLastInput(event) {
           console.log("event");
 
           _keywordCtxLastInput = event.target;
         })(event);
 
-        if(old_function) {
+        if (old_function) {
           old_function(event);
         }
       };
@@ -50,11 +48,20 @@ function bindInputEventHandlers() {
 }
 
 function getKeyword(callback) {
-  if(_debug) {
-    callback("pepdir");
-  }
+  var injectUrl = $.get(chrome.extension.getURL("/html/addKeyword.html")).then(function (html) {
 
-  var injectUrl = $.get(chrome.extension.getURL("/html/addKeyword.html")).then(function(html) {
+    var createKeyword = function () {
+      var keyword = keywordField.val();
+      __ck_dialog.dialog("close");
+
+      callback(keyword);
+    };
+
+    var cancelCreate = function () {
+      __ck_dialog.dialog("close");
+      callback(null);
+    };
+
     $("body").append(html);
     _loadedAddKeyword = true;
 
@@ -65,26 +72,23 @@ function getKeyword(callback) {
       autoOpen: true,
       modal: true,
       buttons: {
-        "Create": function() {
-          var keyword = keywordField.val();
-          __ck_dialog.dialog("close");
-
-          callback(keyword);
-        },
-        "Cancel": function() {
-          __ck_dialog.dialog("close");
-          callback(null);
-        }
+        "Create": createKeyword,
+        "Cancel": cancelCreate
       }
     });
 
+    $(__ck_dialog).find("#__ck_keywordName").on("keyup", function (event) {
+      if (event.keyCode == 13) {
+        createKeyword();
+      }
+    });
 
   });
 }
 
 function createFormField(req, res) {
-  (function(request, sendResponse) {
-    getKeyword(function(keyword) {
+  (function (request, sendResponse) {
+    getKeyword(function (keyword) {
       var lastInput = getLastInput();
 
       var form = lastInput.form;
@@ -99,7 +103,7 @@ function creationSuccess(request, sendResponse) {
   var success = $("#__ck_dialog_create_keyword_success").dialog({
     autoOpen: true,
     buttons: {
-      "Awesome!": function() {
+      "Awesome!": function () {
         success.dialog("close");
       }
     }
@@ -110,7 +114,7 @@ function failureKeyExists(request, sendResponse) {
   var success = $("#__ck_dialog_create_keyword_exists").dialog({
     autoOpen: true,
     buttons: {
-      "Ah man...": function() {
+      "Ah man...": function () {
         success.dialog("close");
       }
     }
@@ -118,14 +122,14 @@ function failureKeyExists(request, sendResponse) {
 }
 
 function bindListeners() {
-  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     console.log("received request: %O", request);
 
-    if(request.command == "createFormField") {
+    if (request.command == "createFormField") {
       createFormField(request, sendResponse);
-    }else if(request.command == "creationSuccess") {
+    } else if (request.command == "creationSuccess") {
       creationSuccess(request, sendResponse);
-    }else if(request.command == "failureKeyExists") {
+    } else if (request.command == "failureKeyExists") {
       failureKeyExists(request, sendResponse);
     }
 

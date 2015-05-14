@@ -11,6 +11,9 @@ function getElementByXPath(xpath) {
 }
 
 function submitForm(formXPath, fieldXPath, formFieldValue) {
+  var _body = document.querySelector("body");
+  _body.style.display = "none";
+  
   var formField = getElementByXPath(fieldXPath);
   formField.value = formFieldValue;
 

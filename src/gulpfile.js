@@ -10,6 +10,7 @@ var gulp = require('gulp'),
 	minifyCss = require('gulp-minify-css');
 
 var paths = {
+	all: './**/*.*',
 	libs: [
 		'./libs/jquery.js',
 		'./libs/lodash.min.js',
@@ -60,15 +61,21 @@ gulp.task('manage', taskManage);
 gulp.task('copy_manage_libs', copyManageLibs);
 gulp.task('copy_static_content', copyStaticContent);
 
-gulp.task('watch', ['copy_manage_libs', 'copy_static_content', 'manage'], function() {
-	watch(paths.manage.all, function() {
-		taskManage();
-	});
+gulp.task('default', defaultTask);
+
+gulp.task('watch', ['default'], function() {
+	watch(paths.all, defaultTask);
 });
+
+function defaultTask() {
+	copyManageLibs();
+	copyStaticContent();
+	taskManage();
+}
 
 function deGlobPaths(obj, keepFolder, basePath) {
 	
-	function secondToLast(aFileName, character) {
+	var secondToLast = function(aFileName, character) {
 		var previousIndex = -1,
 			currentIndex = -1;
 		
@@ -81,7 +88,7 @@ function deGlobPaths(obj, keepFolder, basePath) {
 		}
 		
 		return previousIndex;
-	}
+	};
 	
 	basePath = basePath || "";
 	
